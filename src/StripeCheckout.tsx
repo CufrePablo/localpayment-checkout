@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, CSSProperties } from 'react'
+import React, { useState, useEffect, useRef, CSSProperties } from 'react'
 import type { Theme } from './themes'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -36,11 +36,41 @@ const fmtExpiry = (v: string) => {
 }
 
 const COUNTRIES = [
-  { code: 'AR', flag: '🇦🇷', name: 'Argentina', doc: 'CUIT / DNI', banks: ['Banco Nación', 'Galicia', 'Santander', 'BBVA', 'Brubank'] },
-  { code: 'BR', flag: '🇧🇷', name: 'Brazil',    doc: 'CPF',        banks: ['Nubank', 'Itaú', 'Bradesco', 'Caixa', 'Banco do Brasil'] },
-  { code: 'MX', flag: '🇲🇽', name: 'Mexico',    doc: 'RFC / CURP', banks: ['BBVA', 'Santander', 'Banamex', 'Banorte', 'HSBC'] },
-  { code: 'CO', flag: '🇨🇴', name: 'Colombia',  doc: 'ID / NIT',   banks: ['Bancolombia', 'Davivienda', 'Nequi', 'Banco de Bogotá'] },
-  { code: 'PE', flag: '🇵🇪', name: 'Peru',      doc: 'DNI / RUC',  banks: ['BCP', 'Interbank', 'BBVA', 'Scotiabank'] },
+  {
+    code: 'AR', flag: '🇦🇷', name: 'Argentina', doc: 'DNI / CUIT',
+    banks: ['Banco Nación', 'Galicia', 'Santander', 'BBVA', 'HSBC', 'Brubank', 'Uala', 'Naranja X'],
+    accountField: 'CVU / CBU', accountPh: '22-digit CVU, CBU or alias',
+    accountHint: 'Digital banks (Brubank, Uala) use CVU · Traditional banks use CBU',
+    localCurrency: 'ARS', fxRate: 1000,
+  },
+  {
+    code: 'BR', flag: '🇧🇷', name: 'Brazil', doc: 'CPF',
+    banks: ['Nubank', 'Itaú', 'Bradesco', 'Caixa', 'Banco do Brasil'],
+    accountField: 'PIX Key', accountPh: 'CPF, phone, e-mail or random key',
+    accountHint: 'Any registered PIX key linked to your account',
+    localCurrency: 'BRL', fxRate: 5.1,
+  },
+  {
+    code: 'MX', flag: '🇲🇽', name: 'Mexico', doc: 'RFC / CURP',
+    banks: ['BBVA', 'Santander', 'Banamex', 'Banorte', 'HSBC'],
+    accountField: 'CLABE', accountPh: '18-digit CLABE number',
+    accountHint: 'CLABE is required for all bank transfers in Mexico',
+    localCurrency: 'MXN', fxRate: 17.2,
+  },
+  {
+    code: 'CO', flag: '🇨🇴', name: 'Colombia', doc: 'Cédula / NIT',
+    banks: ['Bancolombia', 'Davivienda', 'Nequi', 'Banco de Bogotá', 'BBVA'],
+    accountField: 'Account number', accountPh: 'Savings or checking account number',
+    accountHint: undefined,
+    localCurrency: 'COP', fxRate: 3900,
+  },
+  {
+    code: 'PE', flag: '🇵🇪', name: 'Peru', doc: 'DNI / RUC',
+    banks: ['BCP', 'Interbank', 'BBVA', 'Scotiabank', 'Banbif'],
+    accountField: 'CCI', accountPh: '20-digit interbank code (CCI)',
+    accountHint: 'Find your CCI in your banking app under "My accounts"',
+    localCurrency: 'PEN', fxRate: 3.8,
+  },
 ]
 
 const APMS = [
@@ -263,50 +293,250 @@ function CardForm({ t }: { t: Theme }) {
 
 // ─── Virtual Account Form ─────────────────────────────────────────────────────
 
-function VirtualForm({ t }: { t: Theme }) {
-  const [country, setCountry] = useState('AR')
-  const [bank, setBank]       = useState('')
-  const [holder, setHolder]   = useState('')
-  const [doc, setDoc]         = useState('')
-  const [focused, setFocused] = useState<string | null>(null)
-  const country_ = COUNTRIES.find(c => c.code === country)!
+function VirtualForm({ t, price, currency }: { t: Theme; price: number; currency: string }) {
+  const [country, setCountry]   = useState('AR')
+  const [bank, setBank]         = useState('')
+  const [holder, setHolder]     = useState('')
+  const [doc, setDoc]           = useState('')
+  const [accountNum, setAccNum] = useState('')
+  const [focused, setFocused]   = useState<string | null>(null)
+
+  const c = COUNTRIES.find(x => x.code === country)!
   const f = (id: string) => inp(t, focused, id)
+  const localAmt = (price * c.fxRate).toLocaleString('en-US', { maximumFractionDigits: 0 })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+      {/* FX conversion banner */}
+      <div style={{
+        background: `${t.accent}0e`, border: `1px solid ${t.accent}25`,
+        borderRadius: 10, padding: '10px 13px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ fontSize: 15 }}>💱</span>
+          <div>
+            <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, lineHeight: 1 }}>
+              You pay
+            </p>
+            <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13.5, fontWeight: 700, color: t.text }}>
+              {currency} {price.toFixed(2)}
+            </p>
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, lineHeight: 1 }}>
+            Transfer amount
+          </p>
+          <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13.5, fontWeight: 700, color: t.accent }}>
+            {c.localCurrency} {localAmt}
+          </p>
+        </div>
+      </div>
+
+      {/* Country */}
       <select style={sel(t)} value={country}
-        onChange={e => { setCountry(e.target.value); setBank('') }}>
-        {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
+        onChange={e => { setCountry(e.target.value); setBank(''); setAccNum('') }}>
+        {COUNTRIES.map(x => <option key={x.code} value={x.code}>{x.flag} {x.name}</option>)}
       </select>
+
+      {/* Bank */}
       <select style={sel(t)} value={bank} onChange={e => setBank(e.target.value)}>
         <option value="">Select bank</option>
-        {country_.banks.map(b => <option key={b} value={b}>{b}</option>)}
+        {c.banks.map(b => <option key={b} value={b}>{b}</option>)}
       </select>
-      <input style={f('holder')} placeholder="Account holder" value={holder}
+
+      {/* Account number — CVU/CBU for AR, CLABE for MX, etc. */}
+      <div>
+        <input
+          style={{ ...f('acct'), borderRadius: accountNum ? 8 : 8 }}
+          placeholder={`${c.accountField} — ${c.accountPh}`}
+          value={accountNum}
+          onChange={e => setAccNum(e.target.value)}
+          onFocus={() => setFocused('acct')}
+          onBlur={() => setFocused(null)}
+        />
+        {c.accountHint && (
+          <p style={{
+            fontFamily: '-apple-system, sans-serif', fontSize: 11,
+            color: t.textMuted, marginTop: 5, paddingLeft: 2, lineHeight: 1.4,
+          }}>
+            {c.accountHint}
+          </p>
+        )}
+      </div>
+
+      {/* Account holder */}
+      <input style={f('holder')} placeholder="Account holder name" value={holder}
         onChange={e => setHolder(e.target.value)}
         onFocus={() => setFocused('holder')} onBlur={() => setFocused(null)} />
-      <input style={f('doc')} placeholder={country_.doc} value={doc}
+
+      {/* Document number */}
+      <input style={f('doc')} placeholder={c.doc} value={doc}
         onChange={e => setDoc(e.target.value)}
         onFocus={() => setFocused('doc')} onBlur={() => setFocused(null)} />
+
+      {/* Instructions */}
       <div style={{
-        background: `${t.accent}0d`, border: `1px solid ${t.accent}22`,
-        borderRadius: 8, padding: '11px 13px',
-        display: 'flex', gap: 9, alignItems: 'flex-start',
+        background: t.surfaceBg, border: `1px solid ${t.border}`,
+        borderRadius: 10, overflow: 'hidden',
       }}>
-        <span style={{ fontSize: 14, flexShrink: 0 }}>ℹ️</span>
-        <p style={{
-          fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-          fontSize: 12, color: t.textSub, lineHeight: 1.55,
-        }}>
-          A unique virtual account will be created. Transfer the exact amount within{' '}
-          <strong style={{ color: t.text }}>48 hours</strong>. Confirmation is automatic.
-        </p>
+        {[
+          { n: '1', text: `Transfer exactly ${c.localCurrency} ${localAmt} to the ${c.accountField} above` },
+          { n: '2', text: 'Use "Nike Air Max TN Plus" as the transfer reference' },
+          { n: '3', text: 'Your order is confirmed automatically — no manual approval needed' },
+        ].map(({ n, text }) => (
+          <div key={n} style={{
+            display: 'flex', gap: 10, padding: '10px 13px',
+            borderBottom: n !== '3' ? `1px solid ${t.border}` : 'none',
+            alignItems: 'flex-start',
+          }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+              background: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: '-apple-system, sans-serif', fontSize: 10.5, fontWeight: 700, color: '#fff',
+            }}>{n}</div>
+            <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, color: t.textSub, lineHeight: 1.5 }}>
+              {text}
+            </p>
+          </div>
+        ))}
       </div>
+
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
+        ⏱ Transfer window: <strong style={{ color: t.textSub }}>48 hours</strong>
+      </p>
     </div>
   )
 }
 
 // ─── APM Form ─────────────────────────────────────────────────────────────────
+
+type DebinStep = 'input' | 'pending' | 'approved'
+
+function DebinFlow({ t, price, currency }: { t: Theme; price: number; currency: string }) {
+  const [cvu, setCvu]   = useState('')
+  const [step, setStep] = useState<DebinStep>('input')
+  const [secs, setSecs] = useState(18)
+  const focused_ref = React.useRef(false)
+
+  React.useEffect(() => {
+    if (step !== 'pending') return
+    if (secs <= 0) { setStep('approved'); return }
+    const id = setTimeout(() => setSecs(s => s - 1), 1000)
+    return () => clearTimeout(id)
+  }, [step, secs])
+
+  const accent = '#2563EB'
+
+  if (step === 'input') return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, animation: 'lpFadeUp .25s ease' }}>
+      <div style={{
+        background: `${accent}0e`, border: `1px solid ${accent}25`,
+        borderRadius: 10, padding: '12px 14px',
+      }}>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, fontWeight: 600, color: accent, marginBottom: 3 }}>
+          Debin — Instant bank debit 🇦🇷
+        </p>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, color: t.textSub, lineHeight: 1.5 }}>
+          We'll send a debit request directly to your bank. You approve it in your banking app and the payment is instant.
+        </p>
+      </div>
+      <input
+        style={{
+          width: '100%', height: 46, padding: '0 14px',
+          background: t.inputBg, border: `1.5px solid ${focused_ref.current ? accent : t.inputBorder}`,
+          borderRadius: 8, fontFamily: '-apple-system, sans-serif', fontSize: 15,
+          color: t.text, outline: 'none', boxSizing: 'border-box' as const,
+          WebkitAppearance: 'none',
+        }}
+        placeholder="Your CVU / CBU (22 digits)"
+        value={cvu}
+        onChange={e => setCvu(e.target.value.replace(/\D/g, '').slice(0, 22))}
+        inputMode="numeric"
+      />
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, marginTop: -4 }}>
+        Find your CVU in Brubank, Uala or Naranja X · CBU in traditional banks
+      </p>
+      <button
+        onClick={() => { if (cvu.length >= 6) { setStep('pending'); setSecs(18) } }}
+        style={{
+          width: '100%', height: 44, background: cvu.length >= 6 ? accent : t.border,
+          color: '#fff', border: 'none', borderRadius: 10,
+          fontFamily: '-apple-system, sans-serif', fontSize: 14, fontWeight: 700,
+          cursor: cvu.length >= 6 ? 'pointer' : 'not-allowed',
+          transition: 'background .2s',
+        }}>
+        Send debit request · {currency} {price.toFixed(2)}
+      </button>
+    </div>
+  )
+
+  if (step === 'pending') return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '8px 0', animation: 'lpFadeUp .25s ease' }}>
+      <div style={{
+        width: 60, height: 60, borderRadius: '50%',
+        border: `3px solid ${accent}30`, borderTopColor: accent,
+        animation: 'lpSpin .8s linear infinite',
+      }} />
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 16, fontWeight: 700, color: t.text }}>
+          Awaiting approval
+        </p>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, marginTop: 4 }}>
+          Open your banking app and approve the request
+        </p>
+      </div>
+      <div style={{
+        width: '100%', background: t.surfaceBg, border: `1px solid ${t.border}`,
+        borderRadius: 12, overflow: 'hidden',
+      }}>
+        {[
+          ['Requesting entity', 'Nike via LocalPayment'],
+          ['Amount', `${currency} ${price.toFixed(2)}`],
+          ['Your CVU', `****${cvu.slice(-4)}`],
+          ['Reference', 'Nike Air Max TN Plus'],
+        ].map(([k, v]) => (
+          <div key={k} style={{
+            display: 'flex', justifyContent: 'space-between', padding: '10px 13px',
+            borderBottom: `1px solid ${t.border}`, fontFamily: '-apple-system, sans-serif', fontSize: 12.5,
+          }}>
+            <span style={{ color: t.textMuted }}>{k}</span>
+            <span style={{ color: t.text, fontWeight: 600 }}>{v}</span>
+          </div>
+        ))}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', padding: '10px 13px',
+          fontFamily: '-apple-system, sans-serif', fontSize: 12.5,
+        }}>
+          <span style={{ color: t.textMuted }}>Expires in</span>
+          <span style={{ color: accent, fontWeight: 700 }}>{secs}s</span>
+        </div>
+      </div>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
+        The request will expire if not approved within {secs} seconds
+      </p>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '8px 0', animation: 'lpFadeUp .25s ease' }}>
+      <div style={{
+        width: 56, height: 56, borderRadius: '50%',
+        background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 26, animation: 'lpPop .4s cubic-bezier(.34,1.56,.64,1)',
+      }}>✓</div>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 16, fontWeight: 700, color: t.text }}>
+        Debit approved!
+      </p>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, textAlign: 'center' }}>
+        {currency} {price.toFixed(2)} was debited from CVU ****{cvu.slice(-4)}
+      </p>
+    </div>
+  )
+}
 
 function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: string }) {
   const [selected, setSelected] = useState<string | null>(null)
@@ -356,6 +586,10 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
                 Code valid for <strong style={{ color: t.textSub }}>10 minutes</strong>
               </p>
             </>
+          ) : apm.id === 'debin' ? (
+            <div style={{ width: '100%' }}>
+              <DebinFlow t={t} price={price} currency={currency} />
+            </div>
           ) : (
             <>
               <div style={{ fontSize: 30 }}>{apm.flag}</div>
@@ -585,7 +819,7 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
               {/* Form */}
               <div style={{ animation: 'lpFadeUp .25s ease', paddingBottom: 6 }} key={tab}>
                 {tab === 'card'    && <CardForm t={t} />}
-                {tab === 'virtual' && <VirtualForm t={t} />}
+                {tab === 'virtual' && <VirtualForm t={t} price={product.price} currency={product.currency} />}
                 {tab === 'apm'     && <ApmForm t={t} price={product.price} currency={product.currency} />}
               </div>
             </>
