@@ -35,19 +35,19 @@ const fmtExpiry = (v: string) => {
 
 const COUNTRIES = [
   { code: 'AR', flag: '🇦🇷', name: 'Argentina', doc: 'CUIT / DNI', banks: ['Banco Nación', 'Galicia', 'Santander', 'BBVA', 'Brubank'] },
-  { code: 'BR', flag: '🇧🇷', name: 'Brasil', doc: 'CPF', banks: ['Nubank', 'Itaú', 'Bradesco', 'Caixa', 'Banco do Brasil'] },
-  { code: 'MX', flag: '🇲🇽', name: 'México', doc: 'RFC / CURP', banks: ['BBVA', 'Santander', 'Banamex', 'Banorte', 'HSBC'] },
+  { code: 'BR', flag: '🇧🇷', name: 'Brazil', doc: 'CPF', banks: ['Nubank', 'Itaú', 'Bradesco', 'Caixa', 'Banco do Brasil'] },
+  { code: 'MX', flag: '🇲🇽', name: 'Mexico', doc: 'RFC / CURP', banks: ['BBVA', 'Santander', 'Banamex', 'Banorte', 'HSBC'] },
   { code: 'CO', flag: '🇨🇴', name: 'Colombia', doc: 'Cédula', banks: ['Bancolombia', 'Davivienda', 'Nequi', 'Banco de Bogotá'] },
-  { code: 'PE', flag: '🇵🇪', name: 'Perú', doc: 'DNI / RUC', banks: ['BCP', 'Interbank', 'BBVA', 'Scotiabank'] },
+  { code: 'PE', flag: '🇵🇪', name: 'Peru', doc: 'DNI / RUC', banks: ['BCP', 'Interbank', 'BBVA', 'Scotiabank'] },
 ]
 
 const APMS = [
-  { id: 'pix', name: 'Pix', flag: '🇧🇷', color: '#32BCAD', desc: 'Transferencia instantánea' },
-  { id: 'breb', name: 'Bre-b', flag: '🇵🇪', color: '#FF6B35', desc: 'Billeteras digitales Perú' },
-  { id: 'debin', name: 'Debin', flag: '🇦🇷', color: '#2563EB', desc: 'Débito bancario inmediato' },
-  { id: 'spei', name: 'SPEI', flag: '🇲🇽', color: '#059669', desc: 'Transferencia bancaria México' },
-  { id: 'pse', name: 'PSE', flag: '🇨🇴', color: '#7C3AED', desc: 'Pagos seguros en línea' },
-  { id: 'nequi', name: 'Nequi', flag: '🇨🇴', color: '#6B21A8', desc: 'Billetera digital Bancolombia' },
+  { id: 'pix', name: 'Pix', flag: '🇧🇷', color: '#32BCAD', desc: 'Instant transfer' },
+  { id: 'breb', name: 'Bre-b', flag: '🇵🇪', color: '#FF6B35', desc: 'Digital wallets Peru' },
+  { id: 'debin', name: 'Debin', flag: '🇦🇷', color: '#2563EB', desc: 'Instant bank debit' },
+  { id: 'spei', name: 'SPEI', flag: '🇲🇽', color: '#059669', desc: 'Bank transfer Mexico' },
+  { id: 'pse', name: 'PSE', flag: '🇨🇴', color: '#7C3AED', desc: 'Secure online payments' },
+  { id: 'nequi', name: 'Nequi', flag: '🇨🇴', color: '#6B21A8', desc: 'Bancolombia digital wallet' },
 ]
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -145,12 +145,12 @@ function CardForm({ t }: { t: Theme }) {
         alignItems: 'center',
       }}>
         <div>
-          <div style={{ fontFamily: 'DM Sans', fontSize: 13, color: t.textMuted, marginBottom: 4 }}>Número de tarjeta</div>
+          <div style={{ fontFamily: 'DM Sans', fontSize: 13, color: t.textMuted, marginBottom: 4 }}>Card number</div>
           <div style={{ fontFamily: 'DM Sans', fontSize: 16, color: t.text, letterSpacing: '0.12em', fontWeight: 500 }}>
             {num ? num.padEnd(19, '·').replace(/\S{4}(?=\S)/g, m => m + ' ').slice(0, 22) : '•••• •••• •••• ••••'}
           </div>
           <div style={{ fontFamily: 'DM Sans', fontSize: 12, color: t.textMuted, marginTop: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {name || 'NOMBRE TITULAR'}
+            {name || 'CARDHOLDER NAME'}
           </div>
         </div>
         <CardTypeIcon type={cardType} size={24} />
@@ -168,7 +168,7 @@ function CardForm({ t }: { t: Theme }) {
       />
       <input
         style={input('name')}
-        placeholder="Nombre en la tarjeta"
+        placeholder="Name on card"
         value={name}
         onChange={e => setName(e.target.value.toUpperCase())}
         onFocus={() => setFocused('name')}
@@ -223,12 +223,12 @@ function VirtualAccountForm({ t }: { t: Theme }) {
         ))}
       </select>
       <select style={sel2} value={bank} onChange={e => setBank(e.target.value)}>
-        <option value="">Seleccionar banco</option>
+        <option value="">Select bank</option>
         {sel.banks.map(b => <option key={b} value={b}>{b}</option>)}
       </select>
       <input
         style={input('holder')}
-        placeholder="Titular de la cuenta"
+        placeholder="Account holder"
         value={holder}
         onChange={e => setHolder(e.target.value)}
         onFocus={() => setFocused('holder')}
@@ -244,7 +244,7 @@ function VirtualAccountForm({ t }: { t: Theme }) {
       />
       <input
         style={input('email')}
-        placeholder="Email para notificación"
+        placeholder="Email for notification"
         type="email"
         value={email}
         onChange={e => setEmail(e.target.value)}
@@ -262,7 +262,7 @@ function VirtualAccountForm({ t }: { t: Theme }) {
       }}>
         <span style={{ fontSize: 16 }}>ℹ️</span>
         <p style={{ fontFamily: 'DM Sans', fontSize: 12, color: t.textSub, lineHeight: 1.5 }}>
-          Se generará una cuenta virtual única. Transfiere el monto exacto en las próximas <strong>48hs</strong>. El pago se confirma automáticamente.
+          A unique virtual account will be created. Transfer the exact amount within the next <strong>48 hours</strong>. Payment is confirmed automatically.
         </p>
       </div>
     </div>
@@ -322,7 +322,7 @@ function AlternativeMethods({ t, price, currency }: { t: Theme; price: number; c
           {apm.id === 'pix' ? (
             <>
               <p style={{ fontFamily: 'DM Sans', fontSize: 13, color: t.textMuted, textAlign: 'center' }}>
-                Escanea el código QR con tu app bancaria
+                Scan the QR code with your banking app
               </p>
               <div style={{ padding: 8, background: 'white', borderRadius: 12 }}>
                 <QRCode accent={apm.color} />
@@ -339,7 +339,7 @@ function AlternativeMethods({ t, price, currency }: { t: Theme; price: number; c
                 {currency} {price.toFixed(2)}
               </div>
               <p style={{ fontFamily: 'DM Sans', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
-                El código expira en <strong>10 minutos</strong>
+                Code expires in <strong>10 minutes</strong>
               </p>
             </>
           ) : (
@@ -354,7 +354,7 @@ function AlternativeMethods({ t, price, currency }: { t: Theme; price: number; c
                 </p>
               </div>
               <p style={{ fontFamily: 'DM Sans', fontSize: 13, color: t.textSub, textAlign: 'center', lineHeight: 1.5 }}>
-                Serás redirigido a tu banco para autorizar el pago de <strong>{currency} {price.toFixed(2)}</strong>
+                You'll be redirected to your bank to authorize the payment of <strong>{currency} {price.toFixed(2)}</strong>
               </p>
             </>
           )}
@@ -363,7 +363,7 @@ function AlternativeMethods({ t, price, currency }: { t: Theme; price: number; c
 
       {!selected && (
         <p style={{ fontFamily: 'DM Sans', fontSize: 12, color: t.textMuted, textAlign: 'center' }}>
-          Selecciona tu método de pago preferido
+          Select your preferred payment method
         </p>
       )}
     </div>
@@ -420,9 +420,9 @@ type Props = {
 }
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'card', label: 'Tarjeta', icon: '💳' },
-  { id: 'virtual', label: 'Cuenta virtual', icon: '🏦' },
-  { id: 'apm', label: 'Otros', icon: '⚡' },
+  { id: 'card', label: 'Card', icon: '💳' },
+  { id: 'virtual', label: 'Bank transfer', icon: '🏦' },
+  { id: 'apm', label: 'Other', icon: '⚡' },
 ]
 
 export default function CheckoutSheet({ open, onClose, product, theme: t }: Props) {
@@ -571,7 +571,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
               }}>✓</div>
               <div style={{ textAlign: 'center' }}>
                 <h2 style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: t.text }}>
-                  ¡Pago confirmado!
+                  Payment confirmed!
                 </h2>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 14, color: t.textMuted, marginTop: 6 }}>
                   {product.name}
@@ -587,7 +587,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
                 width: '100%',
                 textAlign: 'center',
               }}>
-                <p style={{ fontFamily: 'DM Sans', fontSize: 12, color: t.textMuted }}>Nro. de orden</p>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 12, color: t.textMuted }}>Order number</p>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 15, fontWeight: 600, color: t.text, marginTop: 2, letterSpacing: '0.05em' }}>
                   LP-{Math.random().toString(36).toUpperCase().slice(2, 10)}
                 </p>
@@ -608,7 +608,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
                   marginTop: 8,
                 }}
               >
-                Volver a {t.hostName}
+                Back to {t.hostName}
               </button>
             </div>
           ) : (
@@ -644,7 +644,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 28,
-                }}>🛍️</div>
+                }}>👟</div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
@@ -790,7 +790,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
                   Procesando…
                 </>
               ) : (
-                <>🔒 Pagar {product.currency} {product.price.toFixed(2)}</>
+                <>🔒 Pay {product.currency} {product.price.toFixed(2)}</>
               )}
             </button>
 
@@ -803,7 +803,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
               gap: 8,
             }}>
               <p style={{ fontFamily: 'DM Sans', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
-                🔒 Pago seguro · Encriptación TLS 256-bit
+                🔒 Secure payment · TLS 256-bit encryption
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontFamily: 'DM Sans', fontSize: 11, color: t.textMuted, letterSpacing: '.3px' }}>
