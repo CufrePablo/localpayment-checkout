@@ -318,13 +318,13 @@ function TikTokView({ onBuy }: { onBuy: () => void }) {
           <div style={{
             width: 44, height: 44, borderRadius: '50%',
             border: '1.5px solid rgba(255,255,255,.9)',
-            background: '#000',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            overflow: 'hidden', background: '#000',
           }}>
-            {/* Nike swoosh */}
-            <svg width="26" height="10" viewBox="0 0 56 20" fill="white">
-              <path d="M 2 14 C 8 5, 22 0, 38 2 C 50 4, 56 10, 52 15 C 48 19, 16 20, 6 16 C 2 15, 0 15, 2 14 Z"/>
-            </svg>
+            <img
+              src={`${import.meta.env.BASE_URL}nike-logo.png`}
+              alt="Nike"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
           <div style={{
             position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',

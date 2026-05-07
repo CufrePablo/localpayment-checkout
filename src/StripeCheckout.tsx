@@ -763,11 +763,12 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
               borderRadius: 11, padding: '10px 4px', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
               transition: 'all .18s',
+              color: t.text,
             }}>
             <span style={{ fontSize: 17 }}>{a.flag}</span>
             <span style={{
               fontFamily: '-apple-system, sans-serif', fontSize: 9.5, fontWeight: 600,
-              color: selected === a.id ? a.color : t.textMuted, lineHeight: 1.1, textAlign: 'center',
+              color: selected === a.id ? a.color : t.textSub, lineHeight: 1.1, textAlign: 'center',
             }}>{a.name}</span>
           </button>
         ))}
