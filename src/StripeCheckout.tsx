@@ -73,12 +73,21 @@ const COUNTRIES = [
   },
 ]
 
-const APMS = [
-  { id: 'pix',   name: 'Pix',   flag: '🇧🇷', color: '#32BCAD', desc: 'Instant transfer' },
-  { id: 'breb',  name: 'Bre-b', flag: '🇵🇪', color: '#FF6B35', desc: 'Digital wallets Peru' },
-  { id: 'debin', name: 'Debin', flag: '🇦🇷', color: '#2563EB', desc: 'Instant bank debit' },
-  { id: 'spei',  name: 'SPEI',  flag: '🇲🇽', color: '#059669', desc: 'Bank transfer Mexico' },
-  { id: 'pse',   name: 'PSE',   flag: '🇨🇴', color: '#7C3AED', desc: 'Secure online payments' },
+type ApmFlow = 'qr' | 'voucher' | 'clabe' | 'cvu' | 'debin' | 'redirect'
+
+const APMS: {
+  id: string; name: string; flag: string; color: string; desc: string; flow: ApmFlow
+}[] = [
+  { id: 'pix',    name: 'Pix',    flag: '🇧🇷', color: '#32BCAD', desc: 'Instant QR transfer',    flow: 'qr'       },
+  { id: 'yape',   name: 'Yape',   flag: '🇵🇪', color: '#6D28D9', desc: 'BCP digital wallet',     flow: 'qr'       },
+  { id: 'nequi',  name: 'Nequi',  flag: '🇨🇴', color: '#7C3AED', desc: 'Bancolombia wallet',     flow: 'qr'       },
+  { id: 'oxxo',   name: 'OXXO',   flag: '🇲🇽', color: '#E8001C', desc: 'Pay at OXXO stores',     flow: 'voucher'  },
+  { id: 'boleto', name: 'Boleto', flag: '🇧🇷', color: '#1D4ED8', desc: 'Cash payment slip',      flow: 'voucher'  },
+  { id: 'spei',   name: 'SPEI',   flag: '🇲🇽', color: '#059669', desc: 'Bank transfer Mexico',   flow: 'clabe'    },
+  { id: 'cvu',    name: 'CVU',    flag: '🇦🇷', color: '#2563EB', desc: 'AR bank transfer',       flow: 'cvu'      },
+  { id: 'debin',  name: 'Debin',  flag: '🇦🇷', color: '#0EA5E9', desc: 'Instant bank debit',     flow: 'debin'    },
+  { id: 'pse',    name: 'PSE',    flag: '🇨🇴', color: '#9333EA', desc: 'Secure payments CO',     flow: 'redirect' },
+  { id: 'webpay', name: 'Webpay', flag: '🇨🇱', color: '#00A651', desc: 'Transbank Chile',        flow: 'redirect' },
 ]
 
 // ─── Card network icons ────────────────────────────────────────────────────────
@@ -198,6 +207,23 @@ function QRCode({ accent }: { accent: string }) {
             fill={(r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7) ? accent : '#111'} />
         ) : null)
       )}
+    </svg>
+  )
+}
+
+// ─── Barcode ──────────────────────────────────────────────────────────────────
+
+function BarcodeStrips({ color = '#111' }: { color?: string }) {
+  const pattern = [2,1,3,1,1,2,1,3,2,1,1,3,1,2,1,1,3,2,1,2,3,1,1,2,1,3,1,2,1,3,2,1,1,2,3,1,2,1,1,3,1,2,2,1,3,1,2,1]
+  let x = 0
+  const bars: { x: number; w: number; fill: boolean }[] = []
+  pattern.forEach((w, i) => { bars.push({ x, w, fill: i % 2 === 0 }); x += w })
+  const total = x
+  return (
+    <svg width="200" height="56" viewBox={`0 0 ${total} 56`} preserveAspectRatio="none" style={{ width: 200, height: 56 }}>
+      {bars.filter(b => b.fill).map((b, i) => (
+        <rect key={i} x={b.x} y={0} width={b.w} height={56} fill={color} />
+      ))}
     </svg>
   )
 }
@@ -411,6 +437,187 @@ function VirtualForm({ t, price, currency }: { t: Theme; price: number; currency
   )
 }
 
+// ─── APM sub-panels ───────────────────────────────────────────────────────────
+
+function QrPanel({ apm, price, currency, t }: { apm: typeof APMS[0]; price: number; currency: string; t: Theme }) {
+  const labels: Record<string, { title: string; sub: string; copy: string }> = {
+    pix:   { title: 'Scan with your banking app', sub: `Code expires in 10 min · ${currency} ${price.toFixed(2)}`, copy: 'Copy Pix key' },
+    yape:  { title: 'Scan with Yape app', sub: `Open Yape → Scan QR → Confirm · ${currency} ${price.toFixed(2)}`, copy: 'Copy Yape link' },
+    nequi: { title: 'Scan with Nequi', sub: `Open Nequi → QR Code → Scan · ${currency} ${price.toFixed(2)}`, copy: 'Copy Nequi link' },
+  }
+  const l = labels[apm.id] ?? labels.pix
+  const [copied, setCopied] = React.useState(false)
+  const handleCopy = () => { setCopied(true); setTimeout(() => setCopied(false), 2000) }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, textAlign: 'center' }}>{l.title}</p>
+      <div style={{ padding: 8, background: 'white', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,.12)' }}>
+        <QRCode accent={apm.color} />
+      </div>
+      <div style={{ background: `${apm.color}15`, borderRadius: 8, padding: '6px 16px', fontFamily: '-apple-system, sans-serif', fontSize: 13.5, color: apm.color, fontWeight: 700 }}>
+        {currency} {price.toFixed(2)}
+      </div>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center', lineHeight: 1.45 }}>{l.sub}</p>
+      <button onClick={handleCopy} style={{
+        padding: '8px 20px', border: `1.5px solid ${apm.color}`, borderRadius: 8,
+        background: 'transparent', color: apm.color,
+        fontFamily: '-apple-system, sans-serif', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+      }}>{copied ? '✓ Copied!' : l.copy}</button>
+    </div>
+  )
+}
+
+function VoucherPanel({ apm, price, currency, t }: { apm: typeof APMS[0]; price: number; currency: string; t: Theme }) {
+  const isOxxo = apm.id === 'oxxo'
+  const ref = isOxxo ? 'LPM 2026 0507 1234 5678' : '34191.09050 15259.83400 88230.00012 3 00000129990'
+  const due = isOxxo ? 'May 10, 2026' : 'May 14, 2026'
+  const [copied, setCopied] = React.useState(false)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ background: '#fff', borderRadius: 12, padding: '16px 14px', border: `1px solid ${t.border}` }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+          <BarcodeStrips color={apm.color} />
+        </div>
+        <p style={{
+          fontFamily: '"Courier New", monospace', fontSize: isOxxo ? 14.5 : 11,
+          color: '#111', textAlign: 'center', letterSpacing: isOxxo ? '.15em' : '.05em',
+          fontWeight: 700, lineHeight: 1.5,
+        }}>{ref}</p>
+      </div>
+      <div style={{ background: t.surfaceBg, border: `1px solid ${t.border}`, borderRadius: 10, overflow: 'hidden' }}>
+        {[
+          ['Amount', `${currency} ${price.toFixed(2)}`],
+          ['Expires', due],
+          ['Pay at', isOxxo ? 'Any OXXO store in Mexico' : 'Any bank branch or Lotérica'],
+        ].map(([k, v]) => (
+          <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 13px', borderBottom: `1px solid ${t.border}`, fontFamily: '-apple-system, sans-serif', fontSize: 12.5 }}>
+            <span style={{ color: t.textMuted }}>{k}</span>
+            <span style={{ color: t.text, fontWeight: 600 }}>{v}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 13px', fontFamily: '-apple-system, sans-serif', fontSize: 12.5 }}>
+          <span style={{ color: t.textMuted }}>Reference</span>
+          <button onClick={() => setCopied(true)} style={{ background: 'none', border: 'none', color: apm.color, fontWeight: 700, cursor: 'pointer', fontFamily: '-apple-system, sans-serif', fontSize: 12.5 }}>
+            {copied ? '✓ Copied' : 'Copy code'}
+          </button>
+        </div>
+      </div>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center', lineHeight: 1.5 }}>
+        {isOxxo ? '🏪 Show the barcode at any OXXO cashier · Cash only' : '🏦 Print or show this slip at any bank branch or Lotérica agent'}
+      </p>
+    </div>
+  )
+}
+
+function TransferPanel({ apm, price, currency, t }: { apm: typeof APMS[0]; price: number; currency: string; t: Theme }) {
+  const isSpei = apm.id === 'spei'
+  const [copied, setCopied] = React.useState<string | null>(null)
+  const copy = (key: string) => { setCopied(key); setTimeout(() => setCopied(null), 2000) }
+
+  const speiData = [
+    { label: 'CLABE',  value: '014180655010234567', copyKey: 'clabe' },
+    { label: 'Bank',   value: 'Santander Mexico',   copyKey: null },
+    { label: 'Amount', value: `MXN ${(price * 17.2).toLocaleString('en-US', { maximumFractionDigits: 0 })}`, copyKey: null },
+    { label: 'Reference', value: 'LP-NIKE-AIRMAX',  copyKey: 'ref' },
+  ]
+  const cvuData = [
+    { label: 'CVU',    value: '0000003100045566939758', copyKey: 'cvu' },
+    { label: 'Alias',  value: 'localpayment.nike.ar',  copyKey: 'alias' },
+    { label: 'Bank',   value: 'LocalPayment / Brubank', copyKey: null },
+    { label: 'Amount', value: `ARS ${(price * 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`, copyKey: null },
+  ]
+  const rows = isSpei ? speiData : cvuData
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ background: `${apm.color}0d`, border: `1px solid ${apm.color}25`, borderRadius: 10, padding: '10px 13px' }}>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, fontWeight: 600, color: apm.color }}>
+          {isSpei ? '📲 Send via SPEI from your banking app' : '🏦 Transfer to this CVU from any bank or app'}
+        </p>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textSub, marginTop: 3, lineHeight: 1.45 }}>
+          {isSpei ? 'Open your bank → Transfer → SPEI → enter the CLABE below' : 'Use CBU, CVU or alias. Works with Brubank, Uala, Naranja X, Mercado Pago'}
+        </p>
+      </div>
+      <div style={{ background: t.surfaceBg, border: `1px solid ${t.border}`, borderRadius: 10, overflow: 'hidden' }}>
+        {rows.map(({ label, value, copyKey }) => (
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 13px', borderBottom: `1px solid ${t.border}`, fontFamily: '-apple-system, sans-serif', fontSize: 12.5 }}>
+            <span style={{ color: t.textMuted }}>{label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: t.text, fontWeight: 600, fontFamily: copyKey ? '"Courier New", monospace' : '-apple-system, sans-serif', fontSize: copyKey ? 12 : 12.5 }}>{value}</span>
+              {copyKey && (
+                <button onClick={() => copy(copyKey)} style={{ background: 'none', border: 'none', color: apm.color, fontWeight: 600, cursor: 'pointer', fontFamily: '-apple-system, sans-serif', fontSize: 11, padding: 0 }}>
+                  {copied === copyKey ? '✓' : 'Copy'}
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
+        ⏱ Transfer window: <strong style={{ color: t.textSub }}>48 hours</strong> · Confirmed automatically
+      </p>
+    </div>
+  )
+}
+
+function RedirectPanel({ apm, price, currency, t }: { apm: typeof APMS[0]; price: number; currency: string; t: Theme }) {
+  const [bank, setBank] = React.useState<string | null>(null)
+  const [redirecting, setRedirecting] = React.useState(false)
+
+  const banks: Record<string, string[]> = {
+    pse:    ['Bancolombia', 'Davivienda', 'Banco de Bogotá', 'BBVA Colombia', 'Nequi', 'Scotiabank'],
+    webpay: ['Banco de Chile', 'Santander Chile', 'BCI', 'Falabella', 'BancoEstado', 'Security'],
+  }
+  const list = banks[apm.id] ?? []
+
+  if (redirecting) return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '12px 0', animation: 'lpFadeUp .25s ease' }}>
+      <div style={{ width: 48, height: 48, borderRadius: '50%', border: `3px solid ${apm.color}30`, borderTopColor: apm.color, animation: 'lpSpin .8s linear infinite' }} />
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 15, fontWeight: 700, color: t.text }}>Redirecting to {bank}…</p>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, marginTop: 4 }}>Complete login and authorize {currency} {price.toFixed(2)}</p>
+      </div>
+      <div style={{ background: t.surfaceBg, border: `1px solid ${t.border}`, borderRadius: 10, padding: '10px 14px', width: '100%' }}>
+        <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, color: t.textMuted, textAlign: 'center' }}>
+          Do not close this window · Your session is secured by {apm.name}
+        </p>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted }}>Select your bank to proceed</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+        {list.map(b => (
+          <button key={b} onClick={() => setBank(b)} style={{
+            background: bank === b ? `${apm.color}12` : t.surfaceBg,
+            border: `1.5px solid ${bank === b ? apm.color : t.border}`,
+            borderRadius: 9, padding: '10px 10px', cursor: 'pointer',
+            fontFamily: '-apple-system, sans-serif', fontSize: 12.5, fontWeight: bank === b ? 600 : 400,
+            color: bank === b ? apm.color : t.text, transition: 'all .18s', textAlign: 'left',
+          }}>{b}</button>
+        ))}
+      </div>
+      <button
+        disabled={!bank}
+        onClick={() => setRedirecting(true)}
+        style={{
+          width: '100%', height: 44,
+          background: bank ? apm.color : t.border,
+          color: '#fff', border: 'none', borderRadius: 10,
+          fontFamily: '-apple-system, sans-serif', fontSize: 14, fontWeight: 700,
+          cursor: bank ? 'pointer' : 'not-allowed', transition: 'background .2s',
+        }}>
+        Continue to {bank ?? 'your bank'} →
+      </button>
+      <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
+        🔒 Secured by {apm.name} · {currency} {price.toFixed(2)}
+      </p>
+    </div>
+  )
+}
+
 // ─── APM Form ─────────────────────────────────────────────────────────────────
 
 type DebinStep = 'input' | 'pending' | 'approved'
@@ -544,71 +751,61 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+      {/* 5×2 grid — 10 APMs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
         {APMS.map(a => (
-          <button key={a.id} onClick={() => setSelected(selected === a.id ? null : a.id)}
+          <button key={a.id}
+            onClick={() => setSelected(selected === a.id ? null : a.id)}
             style={{
               background: selected === a.id ? `${a.color}15` : t.surfaceBg,
               border: `2px solid ${selected === a.id ? a.color : t.border}`,
-              borderRadius: 11, padding: '9px 4px', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-              transition: 'all .2s',
+              borderRadius: 11, padding: '10px 4px', cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+              transition: 'all .18s',
             }}>
-            <span style={{ fontSize: 16 }}>{a.flag}</span>
+            <span style={{ fontSize: 17 }}>{a.flag}</span>
             <span style={{
               fontFamily: '-apple-system, sans-serif', fontSize: 9.5, fontWeight: 600,
-              color: selected === a.id ? a.color : t.textMuted,
+              color: selected === a.id ? a.color : t.textMuted, lineHeight: 1.1, textAlign: 'center',
             }}>{a.name}</span>
           </button>
         ))}
       </div>
 
+      {/* Panel for selected method */}
       {selected && apm && (
         <div style={{
-          background: t.surfaceBg, border: `1px solid ${t.border}`, borderRadius: 12,
-          padding: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-          animation: 'lpFadeUp .25s ease',
+          background: t.surfaceBg, border: `1px solid ${t.border}`, borderRadius: 14,
+          padding: 16, animation: 'lpFadeUp .25s ease',
         }}>
-          {apm.id === 'pix' ? (
-            <>
-              <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, textAlign: 'center' }}>
-                Scan with your banking app
-              </p>
-              <div style={{ padding: 6, background: 'white', borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,.1)' }}>
-                <QRCode accent={apm.color} />
-              </div>
-              <div style={{
-                background: `${apm.color}15`, borderRadius: 8,
-                padding: '7px 16px', fontFamily: '-apple-system, sans-serif',
-                fontSize: 14, color: apm.color, fontWeight: 700,
-              }}>{currency} {price.toFixed(2)}</div>
-              <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
-                Code valid for <strong style={{ color: t.textSub }}>10 minutes</strong>
-              </p>
-            </>
-          ) : apm.id === 'debin' ? (
-            <div style={{ width: '100%' }}>
-              <DebinFlow t={t} price={price} currency={currency} />
+          {/* Method header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, paddingBottom: 12, borderBottom: `1px solid ${t.border}` }}>
+            <span style={{ fontSize: 20 }}>{apm.flag}</span>
+            <div>
+              <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13.5, fontWeight: 700, color: t.text }}>{apm.name}</p>
+              <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted }}>{apm.desc}</p>
             </div>
-          ) : (
-            <>
-              <div style={{ fontSize: 30 }}>{apm.flag}</div>
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 15, fontWeight: 600, color: t.text }}>{apm.name}</p>
-                <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, marginTop: 3 }}>{apm.desc}</p>
-              </div>
-              <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13, color: t.textMuted, textAlign: 'center', lineHeight: 1.5 }}>
-                You'll be redirected to authorize the payment of{' '}
-                <strong style={{ color: t.text }}>{currency} {price.toFixed(2)}</strong>
-              </p>
-            </>
-          )}
+            <div style={{ marginLeft: 'auto', background: `${apm.color}15`, borderRadius: 7, padding: '3px 10px' }}>
+              <span style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, fontWeight: 700, color: apm.color }}>
+                {currency} {price.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* Flow-specific content */}
+          {apm.flow === 'qr'       && <QrPanel       apm={apm} price={price} currency={currency} t={t} />}
+          {apm.flow === 'voucher'  && <VoucherPanel   apm={apm} price={price} currency={currency} t={t} />}
+          {apm.flow === 'clabe'    && <TransferPanel  apm={apm} price={price} currency={currency} t={t} />}
+          {apm.flow === 'cvu'      && <TransferPanel  apm={apm} price={price} currency={currency} t={t} />}
+          {apm.flow === 'debin'    && <DebinFlow      t={t} price={price} currency={currency} />}
+          {apm.flow === 'redirect' && <RedirectPanel  apm={apm} price={price} currency={currency} t={t} />}
         </div>
       )}
 
       {!selected && (
         <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, color: t.textMuted, textAlign: 'center' }}>
-          Select your preferred method
+          Select your preferred payment method
         </p>
       )}
     </div>
