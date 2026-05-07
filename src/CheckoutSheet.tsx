@@ -670,7 +670,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
                     whiteSpace: 'nowrap',
                   }}>{product.name}</p>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 12, color: t.textMuted, marginTop: 2 }}>
-                    por {product.seller}
+                    by {product.seller}
                   </p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 6 }}>
                     <span style={{
@@ -787,7 +787,7 @@ export default function CheckoutSheet({ open, onClose, product, theme: t }: Prop
                     <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />
                     <path d="M10 2a8 8 0 0 1 8 8" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  Procesando…
+                  Processing…
                 </>
               ) : (
                 <>🔒 Pay {product.currency} {product.price.toFixed(2)}</>
