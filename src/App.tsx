@@ -232,14 +232,6 @@ function TikTokAnimations() {
         0%   { transform: translateX(0); }
         100% { transform: translateX(-50%); }
       }
-      @keyframes ttTagPulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(254,44,85,.55); }
-        50%       { box-shadow: 0 0 0 6px rgba(254,44,85,.0); }
-      }
-      @keyframes ttTagDot {
-        0%, 100% { transform: scale(1); }
-        50%       { transform: scale(1.35); }
-      }
     `}</style>
   )
 }
@@ -265,51 +257,6 @@ function TikTokView({ onBuy }: { onBuy: () => void }) {
         position: 'absolute', inset: 0, pointerEvents: 'none',
         background: 'linear-gradient(to bottom, rgba(0,0,0,.58) 0%, transparent 22%, transparent 50%, rgba(0,0,0,.72) 78%, rgba(0,0,0,.92) 100%)',
       }} />
-
-      {/* ── FLOATING PRODUCT TAG (TikTok Shop pin) ── */}
-      <div onClick={onBuy} style={{
-        position: 'absolute', top: '38%', left: 18, zIndex: 20, cursor: 'pointer',
-        display: 'flex', alignItems: 'center', gap: 0,
-      }}>
-        {/* pulsing dot anchor */}
-        <div style={{
-          width: 10, height: 10, borderRadius: '50%', background: '#FE2C55', flexShrink: 0,
-          animation: 'ttTagDot 1.8s ease-in-out infinite',
-          boxShadow: '0 0 0 3px rgba(254,44,85,.25)',
-        }} />
-        {/* connecting line */}
-        <div style={{ width: 14, height: 1.5, background: 'rgba(255,255,255,.7)' }} />
-        {/* tag bubble */}
-        <div style={{
-          background: 'rgba(10,10,10,.82)', backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderRadius: 10, padding: '7px 10px',
-          border: '1px solid rgba(255,255,255,.14)',
-          animation: 'ttTagPulse 2s ease-in-out infinite',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 6, overflow: 'hidden',
-            background: '#000', border: '1px solid rgba(255,255,255,.1)', flexShrink: 0,
-          }}>
-            <img src={`${import.meta.env.BASE_URL}nike-logo.png`} alt="Nike"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div>
-            <div style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
-              Air Max TN Plus
-            </div>
-            <div style={{ fontFamily: 'DM Sans', fontSize: 10, color: '#FE2C55', fontWeight: 700, marginTop: 1 }}>
-              $129.99
-            </div>
-          </div>
-          <div style={{
-            background: '#FE2C55', borderRadius: 5, padding: '3px 8px', flexShrink: 0,
-          }}>
-            <span style={{ fontFamily: 'DM Sans', fontSize: 9.5, fontWeight: 700, color: '#fff' }}>BUY</span>
-          </div>
-        </div>
-      </div>
 
       {/* ── STATUS BAR ── */}
       <div style={{
