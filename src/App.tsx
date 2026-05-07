@@ -418,12 +418,14 @@ function TikTokView({ onBuy }: { onBuy: () => void }) {
       }}>
         <div style={{
           width: 44, height: 44, borderRadius: 8, flexShrink: 0,
-          background: '#111', border: '1px solid rgba(255,255,255,.1)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: '#000', border: '1px solid rgba(255,255,255,.1)',
+          overflow: 'hidden',
         }}>
-          <svg width="24" height="9" viewBox="0 0 56 20" fill="white">
-            <path d="M 2 14 C 8 5, 22 0, 38 2 C 50 4, 56 10, 52 15 C 48 19, 16 20, 6 16 C 2 15, 0 15, 2 14 Z"/>
-          </svg>
+          <img
+            src={`${import.meta.env.BASE_URL}nike-logo.png`}
+            alt="Nike"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: 'DM Sans', fontSize: 12.5, fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Nike Air Max TN Plus</div>
