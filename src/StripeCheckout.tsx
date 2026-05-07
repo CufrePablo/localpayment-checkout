@@ -858,7 +858,7 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
     setTimeout(() => setStep('success'), 2000)
   }
 
-  const logoSrc = t.logoVariant === 'dark' ? '/logo-dark.png' : '/logo-light.png'
+  const logoSrc = `${import.meta.env.BASE_URL}${t.logoVariant === 'dark' ? 'logo-dark.png' : 'logo-light.png'}`
 
   return (
     <>

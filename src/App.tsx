@@ -315,8 +315,16 @@ function TikTokView({ onBuy }: { onBuy: () => void }) {
       }}>
         {/* Avatar + follow */}
         <div style={{ position: 'relative', paddingBottom: 10 }}>
-          <div style={{ width: 44, height: 44, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,.9)', overflow: 'hidden', background: '#222' }}>
-            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=80&h=80&fit=crop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%',
+            border: '1.5px solid rgba(255,255,255,.9)',
+            background: '#000',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {/* Nike swoosh */}
+            <svg width="26" height="10" viewBox="0 0 56 20" fill="white">
+              <path d="M 2 14 C 8 5, 22 0, 38 2 C 50 4, 56 10, 52 15 C 48 19, 16 20, 6 16 C 2 15, 0 15, 2 14 Z"/>
+            </svg>
           </div>
           <div style={{
             position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
@@ -408,10 +416,15 @@ function TikTokView({ onBuy }: { onBuy: () => void }) {
         padding: '10px 12px',
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
-        <img
-          src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop&q=85"
-          style={{ width: 44, height: 44, borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(255,255,255,.1)', flexShrink: 0 }}
-        />
+        <div style={{
+          width: 44, height: 44, borderRadius: 8, flexShrink: 0,
+          background: '#111', border: '1px solid rgba(255,255,255,.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="24" height="9" viewBox="0 0 56 20" fill="white">
+            <path d="M 2 14 C 8 5, 22 0, 38 2 C 50 4, 56 10, 52 15 C 48 19, 16 20, 6 16 C 2 15, 0 15, 2 14 Z"/>
+          </svg>
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: 'DM Sans', fontSize: 12.5, fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Nike Air Max TN Plus</div>
           <div style={{ fontFamily: 'DM Sans', fontSize: 11, color: 'rgba(255,255,255,.38)', marginTop: 1 }}>USD $129.99</div>
