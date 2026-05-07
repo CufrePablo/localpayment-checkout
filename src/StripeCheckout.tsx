@@ -37,18 +37,18 @@ const fmtExpiry = (v: string) => {
 
 const COUNTRIES = [
   { code: 'AR', flag: '🇦🇷', name: 'Argentina', doc: 'CUIT / DNI', banks: ['Banco Nación', 'Galicia', 'Santander', 'BBVA', 'Brubank'] },
-  { code: 'BR', flag: '🇧🇷', name: 'Brasil',    doc: 'CPF',        banks: ['Nubank', 'Itaú', 'Bradesco', 'Caixa', 'Banco do Brasil'] },
-  { code: 'MX', flag: '🇲🇽', name: 'México',    doc: 'RFC / CURP', banks: ['BBVA', 'Santander', 'Banamex', 'Banorte', 'HSBC'] },
-  { code: 'CO', flag: '🇨🇴', name: 'Colombia',  doc: 'Cédula',     banks: ['Bancolombia', 'Davivienda', 'Nequi', 'Banco de Bogotá'] },
-  { code: 'PE', flag: '🇵🇪', name: 'Perú',      doc: 'DNI / RUC',  banks: ['BCP', 'Interbank', 'BBVA', 'Scotiabank'] },
+  { code: 'BR', flag: '🇧🇷', name: 'Brazil',    doc: 'CPF',        banks: ['Nubank', 'Itaú', 'Bradesco', 'Caixa', 'Banco do Brasil'] },
+  { code: 'MX', flag: '🇲🇽', name: 'Mexico',    doc: 'RFC / CURP', banks: ['BBVA', 'Santander', 'Banamex', 'Banorte', 'HSBC'] },
+  { code: 'CO', flag: '🇨🇴', name: 'Colombia',  doc: 'ID / NIT',   banks: ['Bancolombia', 'Davivienda', 'Nequi', 'Banco de Bogotá'] },
+  { code: 'PE', flag: '🇵🇪', name: 'Peru',      doc: 'DNI / RUC',  banks: ['BCP', 'Interbank', 'BBVA', 'Scotiabank'] },
 ]
 
 const APMS = [
-  { id: 'pix',   name: 'Pix',   flag: '🇧🇷', color: '#32BCAD', desc: 'Transferencia instantánea' },
-  { id: 'breb',  name: 'Bre-b', flag: '🇵🇪', color: '#FF6B35', desc: 'Billeteras digitales Perú' },
-  { id: 'debin', name: 'Debin', flag: '🇦🇷', color: '#2563EB', desc: 'Débito bancario inmediato' },
-  { id: 'spei',  name: 'SPEI',  flag: '🇲🇽', color: '#059669', desc: 'Transferencia bancaria México' },
-  { id: 'pse',   name: 'PSE',   flag: '🇨🇴', color: '#7C3AED', desc: 'Pagos seguros en línea' },
+  { id: 'pix',   name: 'Pix',   flag: '🇧🇷', color: '#32BCAD', desc: 'Instant transfer' },
+  { id: 'breb',  name: 'Bre-b', flag: '🇵🇪', color: '#FF6B35', desc: 'Digital wallets Peru' },
+  { id: 'debin', name: 'Debin', flag: '🇦🇷', color: '#2563EB', desc: 'Instant bank debit' },
+  { id: 'spei',  name: 'SPEI',  flag: '🇲🇽', color: '#059669', desc: 'Bank transfer Mexico' },
+  { id: 'pse',   name: 'PSE',   flag: '🇨🇴', color: '#7C3AED', desc: 'Secure online payments' },
 ]
 
 // ─── Card network icons ────────────────────────────────────────────────────────
@@ -240,13 +240,13 @@ function CardForm({ t }: { t: Theme }) {
         </span>
       </div>
       <input
-        style={f('name')} placeholder="Nombre en la tarjeta"
+        style={f('name')} placeholder="Name on card"
         value={name} onChange={e => setName(e.target.value.toUpperCase())}
         onFocus={() => setFocused('name')} onBlur={() => setFocused(null)}
       />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <input
-          style={f('exp')} placeholder="MM / AA" value={expiry} maxLength={7}
+          style={f('exp')} placeholder="MM / YY" value={expiry} maxLength={7}
           inputMode="numeric" onChange={e => setExpiry(fmtExpiry(e.target.value))}
           onFocus={() => setFocused('exp')} onBlur={() => setFocused(null)}
         />
@@ -279,10 +279,10 @@ function VirtualForm({ t }: { t: Theme }) {
         {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
       </select>
       <select style={sel(t)} value={bank} onChange={e => setBank(e.target.value)}>
-        <option value="">Seleccionar banco</option>
+        <option value="">Select bank</option>
         {country_.banks.map(b => <option key={b} value={b}>{b}</option>)}
       </select>
-      <input style={f('holder')} placeholder="Titular de la cuenta" value={holder}
+      <input style={f('holder')} placeholder="Account holder" value={holder}
         onChange={e => setHolder(e.target.value)}
         onFocus={() => setFocused('holder')} onBlur={() => setFocused(null)} />
       <input style={f('doc')} placeholder={country_.doc} value={doc}
@@ -298,8 +298,8 @@ function VirtualForm({ t }: { t: Theme }) {
           fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
           fontSize: 12, color: t.textSub, lineHeight: 1.55,
         }}>
-          Se generará una cuenta virtual única. Transfiere el monto exacto en las próximas{' '}
-          <strong style={{ color: t.text }}>48hs</strong>. La confirmación es automática.
+          A unique virtual account will be created. Transfer the exact amount within{' '}
+          <strong style={{ color: t.text }}>48 hours</strong>. Confirmation is automatic.
         </p>
       </div>
     </div>
@@ -342,7 +342,7 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
           {apm.id === 'pix' ? (
             <>
               <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, textAlign: 'center' }}>
-                Escanea con tu app bancaria
+                Scan with your banking app
               </p>
               <div style={{ padding: 6, background: 'white', borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,.1)' }}>
                 <QRCode accent={apm.color} />
@@ -353,7 +353,7 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
                 fontSize: 14, color: apm.color, fontWeight: 700,
               }}>{currency} {price.toFixed(2)}</div>
               <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 11, color: t.textMuted, textAlign: 'center' }}>
-                Código válido por <strong style={{ color: t.textSub }}>10 minutos</strong>
+                Code valid for <strong style={{ color: t.textSub }}>10 minutes</strong>
               </p>
             </>
           ) : (
@@ -364,7 +364,7 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
                 <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12.5, color: t.textMuted, marginTop: 3 }}>{apm.desc}</p>
               </div>
               <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13, color: t.textMuted, textAlign: 'center', lineHeight: 1.5 }}>
-                Serás redirigido para autorizar el pago de{' '}
+                You'll be redirected to authorize the payment of{' '}
                 <strong style={{ color: t.text }}>{currency} {price.toFixed(2)}</strong>
               </p>
             </>
@@ -374,7 +374,7 @@ function ApmForm({ t, price, currency }: { t: Theme; price: number; currency: st
 
       {!selected && (
         <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 12, color: t.textMuted, textAlign: 'center' }}>
-          Selecciona tu método preferido
+          Select your preferred method
         </p>
       )}
     </div>
@@ -391,9 +391,9 @@ type Props = {
 }
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'card',    label: 'Tarjeta',       icon: '💳' },
-  { id: 'virtual', label: 'Cuenta virtual', icon: '🏦' },
-  { id: 'apm',     label: 'Otros métodos',  icon: '⚡' },
+  { id: 'card',    label: 'Card',           icon: '💳' },
+  { id: 'virtual', label: 'Bank transfer',  icon: '🏦' },
+  { id: 'apm',     label: 'Other',          icon: '⚡' },
 ]
 
 export default function StripeCheckout({ open, onClose, product, theme: t }: Props) {
@@ -530,7 +530,7 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
                   <p style={{
                     fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
                     fontSize: 11.5, color: t.textMuted, marginTop: 2,
-                  }}>por {product.seller}</p>
+                  }}>by {product.seller}</p>
                 </div>
 
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -607,9 +607,9 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
                 <p style={{
                   fontFamily: '-apple-system, sans-serif',
                   fontSize: 17, fontWeight: 700, color: t.text, marginBottom: 5,
-                }}>Procesando pago…</p>
+                }}>Processing payment…</p>
                 <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13, color: t.textMuted }}>
-                  No cierres esta ventana
+                  Don't close this window
                 </p>
               </div>
             </div>
@@ -633,9 +633,9 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
                 <h2 style={{
                   fontFamily: '-apple-system, sans-serif',
                   fontSize: 21, fontWeight: 800, color: t.text, marginBottom: 6,
-                }}>¡Pago exitoso!</h2>
+                }}>Payment successful!</h2>
                 <p style={{ fontFamily: '-apple-system, sans-serif', fontSize: 13.5, color: t.textMuted }}>
-                  Tu compra fue procesada correctamente.
+                  Your purchase was processed successfully.
                 </p>
               </div>
               <div style={{
@@ -643,10 +643,10 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
                 borderRadius: 12, overflow: 'hidden',
               }}>
                 {([
-                  ['Producto', product.name],
-                  ['Monto',    `${product.currency} ${product.price.toFixed(2)}`],
-                  ['Estado',   '✅ Confirmado'],
-                  ['Orden',    `LP-${Math.random().toString(36).toUpperCase().slice(2, 9)}`],
+                  ['Product', product.name],
+                  ['Amount',  `${product.currency} ${product.price.toFixed(2)}`],
+                  ['Status',  '✅ Confirmed'],
+                  ['Order',   `LP-${Math.random().toString(36).toUpperCase().slice(2, 9)}`],
                 ] as [string, string][]).map(([k, v], i, arr) => (
                   <div key={k} style={{
                     display: 'flex', justifyContent: 'space-between',
@@ -665,7 +665,7 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
                 border: 'none', borderRadius: 12,
                 fontFamily: '-apple-system, sans-serif',
                 fontSize: 16, fontWeight: 700, cursor: 'pointer', marginTop: 4,
-              }}>Volver a {t.hostName}</button>
+              }}>Back to {t.hostName}</button>
             </div>
           )}
         </div>
@@ -688,7 +688,7 @@ export default function StripeCheckout({ open, onClose, product, theme: t }: Pro
                 letterSpacing: '.2px',
               }}
             >
-              🔒 Pagar {product.currency} {product.price.toFixed(2)}
+              🔒 Pay {product.currency} {product.price.toFixed(2)}
             </button>
 
             <div style={{
